@@ -1,0 +1,95 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from './useAuth';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+export interface Profile {
+  uid: string;
+  displayName?: string;
+  bio?: string;
+  photoURL?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export const useProfile = () => {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // プロフィール取得
+  const fetchProfile = async () => {
+    if (!user) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const profileDoc = await getDoc(doc(db, 'profiles', user.uid));
+      
+      if (profileDoc.exists()) {
+        const data = profileDoc.data();
+        setProfile({
+          uid: user.uid,
+          displayName: data.displayName,
+          bio: data.bio,
+          photoURL: data.photoURL,
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate(),
+        });
+      } else {
+        // プロフィールが存在しない場合は基本情報を設定
+        const newProfile = {
+          uid: user.uid,
+          displayName: user.displayName || '',
+          bio: '',
+          photoURL: user.photoURL || '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        
+        // Firestoreに新しいプロフィールを作成
+        await setDoc(doc(db, 'profiles', user.uid), newProfile);
+        setProfile(newProfile);
+      }
+    } catch (error) {
+      console.error('プロフィール取得エラー:', error);
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // プロフィール更新
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return;
+
+    try {
+      const profileRef = doc(db, 'profiles', user.uid);
+      const updateData = {
+        ...updates,
+        updatedAt: new Date(),
+      };
+
+      await updateDoc(profileRef, updateData);
+      
+      // ローカル状態も更新
+      setProfile(prev => prev ? { ...prev, ...updateData } : null);
+    } catch (error) {
+      console.error('プロフィール更新エラー:', error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, [user]);
+
+  return {
+    profile,
+    loading,
+    updateProfile,
+    refetch: fetchProfile,
+  };
+};

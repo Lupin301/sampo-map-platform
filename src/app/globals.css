@@ -1,0 +1,415 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Mapbox GL CSS */
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Mapbox コントロールボタンのスタイル調整 */
+.mapboxgl-ctrl-bottom-right {
+  margin-bottom: 20px !important;
+  margin-right: 20px !important;
+}
+
+.mapboxgl-ctrl-group {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* モバイル対応 */
+@media (max-width: 640px) {
+  .mapboxgl-ctrl-bottom-right {
+    margin-bottom: 15px !important;
+    margin-right: 15px !important;
+  }
+}
+
+/* プレースホルダーの文字色を改善 */
+::placeholder {
+  color: #6b7280 !important; /* text-gray-500 */
+  opacity: 1 !important;
+}
+
+::-webkit-input-placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+::-moz-placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+:-ms-input-placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+/* 入力時の文字色を濃くする */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="number"],
+textarea {
+  color: #111827 !important; /* text-gray-900 */
+}
+
+/* フォーカス時のプレースホルダー */
+input:focus::placeholder,
+textarea:focus::placeholder {
+  color: #9ca3af !important; /* text-gray-400 */
+  opacity: 1 !important;
+}
+
+/* Mapbox コントロールボタンのスタイル調整 */
+.mapboxgl-ctrl-bottom-right {
+  margin-bottom: 20px !important;
+  margin-right: 20px !important;
+}
+
+.mapboxgl-ctrl-group {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* モバイル対応 */
+@media (max-width: 640px) {
+  .mapboxgl-ctrl-bottom-right {
+    margin-bottom: 15px !important;
+    margin-right: 15px !important;
+  }
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Mapbox タッチイベント警告抑制 */
+.mapboxgl-canvas {
+  touch-action: none;
+}
+
+.mapboxgl-map {
+  touch-action: none;
+}
+
+/* Mapbox コントロールボタンのスタイル調整 */
+.mapboxgl-ctrl-bottom-right {
+  margin-bottom: 20px !important;
+  margin-right: 20px !important;
+}
+
+.mapboxgl-ctrl-group {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* モバイル対応 */
+@media (max-width: 640px) {
+  .mapboxgl-ctrl-bottom-right {
+    margin-bottom: 15px !important;
+    margin-right: 15px !important;
+  }
+}
+
+/* Google Places Autocompleteのドロップダウンスタイル改善 */
+.pac-container {
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  margin-top: 4px !important;
+  overflow: hidden !important;
+}
+
+.pac-item {
+  background-color: white !important;
+  color: #374151 !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.pac-item:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+.pac-item-selected {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
+
+.pac-item-query {
+  color: #111827 !important;
+  font-weight: 600 !important;
+}
+
+.pac-matched {
+  font-weight: 700 !important;
+  color: #1d4ed8 !important;
+}
+
+.pac-icon {
+  background-image: none !important;
+  background-color: #e5e7eb !important;
+  border-radius: 4px !important;
+  width: 20px !important;
+  height: 20px !important;
+  margin-right: 12px !important;
+}
+
+.pac-icon-marker {
+  background-color: #3b82f6 !important;
+}
+
+/* Mapbox タッチイベント警告抑制 */
+.mapboxgl-canvas {
+  touch-action: none;
+}
+
+.mapboxgl-map {
+  touch-action: none;
+}
+
+/* Mapbox コントロールボタンのスタイル調整 */
+.mapboxgl-ctrl-bottom-right {
+  margin-bottom: 20px !important;
+  margin-right: 20px !important;
+}
+
+.mapboxgl-ctrl-group {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* モバイル対応 */
+@media (max-width: 640px) {
+  .mapboxgl-ctrl-bottom-right {
+    margin-bottom: 15px !important;
+    margin-right: 15px !important;
+  }
+  
+  .pac-container {
+    max-width: calc(100vw - 32px) !important;
+  }
+}
+
+/* プレースホルダーの文字色を改善 */
+::placeholder {
+  color: #6b7280 !important; /* text-gray-500 */
+  opacity: 1 !important;
+}
+
+::-webkit-input-placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+::-moz-placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+:-ms-input-placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+/* 入力時の文字色を濃くする */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="number"],
+textarea {
+  color: #111827 !important; /* text-gray-900 */
+}
+
+/* フォーカス時のプレースホルダー */
+input:focus::placeholder,
+textarea:focus::placeholder {
+  color: #9ca3af !important; /* text-gray-400 */
+  opacity: 1 !important;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* レスポンシブ対応とスクロール改善 */
+@media (max-width: 768px) {
+  .custom-marker {
+    transform: scale(0.9);
+  }
+  
+  .pac-container {
+    max-width: calc(100vw - 64px) !important;
+    font-size: 14px !important;
+  }
+  
+  .pac-item {
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .custom-marker {
+    transform: scale(0.8);
+  }
+  
+  .pac-container {
+    max-width: calc(100vw - 48px) !important;
+    font-size: 13px !important;
+  }
+  
+  .pac-item {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* スクロールバーのスタイル改善 */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Firefox用 */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* タッチデバイス用のスクロール改善 */
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* マーカーのホバーエフェクト */
+.custom-marker:hover {
+  z-index: 10;
+}
+
+/* モバイル対応のマップコントロール */
+@media (max-width: 768px) {
+  .mapboxgl-ctrl-bottom-right {
+    margin-bottom: 60px !important;
+    margin-right: 10px !important;
+  }
+  
+  .mapboxgl-ctrl-group {
+    flex-direction: column !important;
+  }
+  
+  .mapboxgl-ctrl-group > button {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
+/* タブレット対応 */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .mapboxgl-ctrl-bottom-right {
+    margin-bottom: 20px !important;
+    margin-right: 15px !important;
+  }
+}
+
+/* スポットエディターのレスポンシブ */
+@media (max-width: 640px) {
+  .absolute.inset-0.bg-black.bg-opacity-50 {
+    padding: 16px !important;
+  }
+}
