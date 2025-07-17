@@ -14,7 +14,7 @@ export default function CreateMapPage() {
   
   const [formData, setFormData] = useState({
     title: '',
-    description: '', // 空文字列でも可
+    description: '',
     isPublic: true,
     spots: []
   });
@@ -58,65 +58,55 @@ export default function CreateMapPage() {
     <>
       <Header />
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-4 py-8">
           
-          {/* ヘッダー */}
+          {/* シンプルなヘッダー */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">地図を作成</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">地図を作成</h1>
             <p className="text-gray-600">あなたの特別な場所を共有しましょう</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            {/* 基本情報 */}
+            {/* 基本情報 - note.com風のシンプルなデザイン */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">基本情報</h2>
-              
               <div className="space-y-4">
-                {/* タイトル（必須） */}
+                
+                {/* タイトル */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    地図のタイトル <span className="text-red-500">*</span>
-                  </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="例：お気に入りのカフェ巡り"
+                    className="w-full px-0 py-2 text-2xl font-bold text-gray-900 placeholder-gray-400 border-0 border-b-2 border-transparent focus:border-blue-500 focus:outline-none resize-none"
+                    placeholder="地図のタイトルを入力"
                     required
                   />
                 </div>
 
                 {/* 説明（任意） */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    説明（任意）
-                  </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-0 py-2 text-gray-700 placeholder-gray-400 border-0 border-b border-gray-200 focus:border-blue-500 focus:outline-none resize-none"
                     placeholder="この地図について簡単に説明してください（任意）"
                   />
                 </div>
 
                 {/* 公開設定 */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    公開設定
-                  </label>
-                  <div className="space-y-2">
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-center space-x-6">
                     <label className="flex items-center">
                       <input
                         type="radio"
                         name="isPublic"
                         checked={formData.isPublic}
                         onChange={() => setFormData({ ...formData, isPublic: true })}
-                        className="mr-2"
+                        className="mr-2 text-blue-600"
                       />
-                      <span className="text-sm text-gray-700">公開（みんなが見ることができます）</span>
+                      <span className="text-sm text-gray-700">公開</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -124,9 +114,9 @@ export default function CreateMapPage() {
                         name="isPublic"
                         checked={!formData.isPublic}
                         onChange={() => setFormData({ ...formData, isPublic: false })}
-                        className="mr-2"
+                        className="mr-2 text-blue-600"
                       />
-                      <span className="text-sm text-gray-700">非公開（自分だけが見ることができます）</span>
+                      <span className="text-sm text-gray-700">非公開</span>
                     </label>
                   </div>
                 </div>
@@ -135,28 +125,20 @@ export default function CreateMapPage() {
 
             {/* 地図エディター */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">地図にスポットを追加</h2>
               <MapEditor
                 spots={formData.spots}
                 onSpotsChange={(spots) => setFormData({ ...formData, spots })}
               />
             </div>
 
-            {/* 作成ボタン */}
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="px-6 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              >
-                キャンセル
-              </button>
+            {/* 作成ボタン - note.com風のシンプルなデザイン */}
+            <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={isLoading || !formData.title.trim()}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {isLoading ? '作成中...' : '地図を作成'}
+                {isLoading ? '作成中...' : '公開する'}
               </button>
             </div>
 
