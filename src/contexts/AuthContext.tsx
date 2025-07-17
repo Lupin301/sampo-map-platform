@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, isFirebaseConfigured } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -21,6 +21,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      // デモモードの場合、仮のユーザーを設定
+      const demoUser = {
+        uid: 'demo-user',
+        email: 'demo@example.com',
+        displayName: 'デモユーザー',
+        photoURL: null,
+      } as User;
+      
+      setUser(demoUser);
+      setLoading(false);
+      return;
+    }
+
+    // Firebase設定が正しい場合のみ認証監視
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -31,7 +46,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      if (isFirebaseConfigured()) {
+        await signOut(auth);
+      } else {
+        // デモモードの場合
+        setUser(null);
+      }
     } catch (error) {
       console.error('ログアウトエラー:', error);
     }

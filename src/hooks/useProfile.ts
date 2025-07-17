@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, isFirebaseConfigured } from '@/lib/firebase';
 
 export interface Profile {
   uid: string;
@@ -26,6 +26,21 @@ export const useProfile = () => {
     }
 
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合
+        const demoProfile = {
+          uid: user.uid,
+          displayName: user.displayName || 'デモユーザー',
+          bio: 'これはデモプロフィールです。',
+          photoURL: user.photoURL || '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        setProfile(demoProfile);
+        setLoading(false);
+        return;
+      }
+
       const profileDoc = await getDoc(doc(db, 'profiles', user.uid));
       
       if (profileDoc.exists()) {
@@ -66,6 +81,12 @@ export const useProfile = () => {
     if (!user) return;
 
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合はローカル状態のみ更新
+        setProfile(prev => prev ? { ...prev, ...updates, updatedAt: new Date() } : null);
+        return;
+      }
+
       const profileRef = doc(db, 'profiles', user.uid);
       const updateData = {
         ...updates,
