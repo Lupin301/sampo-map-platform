@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import GooglePlacesSearch from './GooglePlacesSearch';
 
 interface Spot {
   id: string;
@@ -34,12 +35,25 @@ export default function MapEditor({ spots, onSpotsChange }: MapEditorProps) {
         // Mapbox GL JSを動的に読み込み
         const mapboxgl = await import('mapbox-gl');
         
-        if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN) {
+        const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+        
+        if (!accessToken) {
           console.warn('Mapbox access token not found. Using demo mode.');
+          // デモ用の地図表示
+          if (mapContainerRef.current) {
+            mapContainerRef.current.innerHTML = `
+              <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                <div class="text-center text-gray-600">
+                  <div class="text-lg font-medium mb-2">デモ地図</div>
+                  <div class="text-sm">Mapbox tokenを設定してください</div>
+                </div>
+              </div>
+            `;
+          }
           return;
         }
 
-        mapboxgl.default.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+        mapboxgl.default.accessToken = accessToken;
 
         const map = new mapboxgl.default.Map({
           container: mapContainerRef.current!,
@@ -143,6 +157,29 @@ export default function MapEditor({ spots, onSpotsChange }: MapEditorProps) {
     }
   }, [spots, mapboxLoaded]);
 
+  // Google Places APIから場所を追加
+  const handlePlaceSelect = (place: any) => {
+    const newSpot: Spot = {
+      id: Date.now().toString(),
+      name: place.name,
+      address: place.address,
+      lat: place.lat,
+      lng: place.lng,
+      description: '',
+      order: spots.length + 1
+    };
+    
+    onSpotsChange([...spots, newSpot]);
+
+    // 地図の中心を移動
+    if (mapRef.current) {
+      mapRef.current.flyTo({
+        center: [place.lng, place.lat],
+        zoom: 15
+      });
+    }
+  };
+
   // スポットを更新
   const handleUpdateSpot = (updatedSpot: Spot) => {
     const updatedSpots = spots.map(spot => 
@@ -169,18 +206,7 @@ export default function MapEditor({ spots, onSpotsChange }: MapEditorProps) {
         
         {/* 検索エリア */}
         <div className="p-4 border-b border-gray-200">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="場所を検索..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <div className="absolute right-3 top-2.5">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </div>
+          <GooglePlacesSearch onPlaceSelect={handlePlaceSelect} />
           <p className="text-sm text-gray-500 mt-2">
             ✅ 場所を検索してスポットを追加できます
           </p>
