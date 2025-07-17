@@ -4,202 +4,190 @@ import { useEffect, useState } from 'react';
 import { useFirestore, MapData, mapCategories } from '@/hooks/useFirestore';
 import Header from '@/components/Header';
 import LikeButton from '@/components/UI/LikeButton';
-import Link from 'next/link';
+import ClientOnly from '@/components/ClientOnly';
 
 export default function MarketplacePage() {
   const { getPublicMaps, loading } = useFirestore();
   const [maps, setMaps] = useState<MapData[]>([]);
   const [filteredMaps, setFilteredMaps] = useState<MapData[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
-    loadMaps();
-  }, []);
+    const fetchMaps = async () => {
+      try {
+        const publicMaps = await getPublicMaps();
+        setMaps(publicMaps);
+        setFilteredMaps(publicMaps);
+      } catch (error) {
+        console.error('公開地図の取得エラー:', error);
+      }
+    };
 
+    fetchMaps();
+  }, [getPublicMaps]);
+
+  // フィルタリング機能
   useEffect(() => {
-    filterMaps();
-  }, [maps, selectedCategory, searchTerm]);
-
-  const loadMaps = async () => {
-    try {
-      const publicMaps = await getPublicMaps();
-      setMaps(publicMaps);
-    } catch (error) {
-      console.error('地図読み込みエラー:', error);
-    }
-  };
-
-  const filterMaps = () => {
     let filtered = maps;
 
-    // カテゴリでフィルター
+    // カテゴリフィルタ
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(map => map.category === selectedCategory);
     }
 
-    // 検索でフィルター
-    if (searchTerm) {
-      filtered = filtered.filter(map =>
-        map.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        map.description.toLowerCase().includes(searchTerm.toLowerCase())
+    // 検索フィルタ
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(map => 
+        map.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        map.description?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     setFilteredMaps(filtered);
-  };
-
-  const formatPrice = (price?: number) => {
-    if (!price) return '無料';
-    return `¥${price.toLocaleString()}`;
-  };
-
-  const getCategoryLabel = (categoryValue: string) => {
-    const category = mapCategories.find(cat => cat.value === categoryValue);
-    return category ? category.label : 'その他';
-  };
+  }, [maps, selectedCategory, searchQuery]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <>
         <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <div className="mt-2 text-gray-600">地図を読み込み中...</div>
+        <div className="min-h-screen bg-gray-50">
+          <div className="flex items-center justify-center pt-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Header />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* ヘッダー */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-            マーケットプレイス
-          </h1>
-          <p className="text-gray-600">
-            世界中のクリエイターが作成した地図を発見しよう
-          </p>
-        </div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          
+          {/* ヘッダー */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">マーケットプレイス</h1>
+            <p className="text-gray-600">みんなが作った地図を探してみよう</p>
+          </div>
 
-        {/* 検索とフィルター */}
-        <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 mb-8">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* 検索ボックス */}
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="地図を検索..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
-              />
-            </div>
+          {/* 検索・フィルタ */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              
+              {/* 検索バー */}
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="地図のタイトルや説明から検索..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-            {/* カテゴリフィルター */}
-            <div className="sm:w-64">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-              >
-                <option value="all">すべてのカテゴリ</option>
-                {mapCategories.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
+              {/* カテゴリフィルタ */}
+              <div className="md:w-48">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option key="all" value="all">全てのカテゴリ</option>
+                  {mapCategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.icon} {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
-          <div className="mt-4 text-sm text-gray-600">
-            {filteredMaps.length} 件の地図が見つかりました
-          </div>
-        </div>
+          {/* 地図一覧 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMaps.length > 0 ? (
+              filteredMaps.map((map) => (
+                <div
+                  key={map.id}
+                  className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  {/* 地図サムネイル */}
+                  <div className="h-48 bg-gray-200 flex items-center justify-center">
+                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3v10" />
+                    </svg>
+                  </div>
 
-        {/* 地図一覧 */}
-        {filteredMaps.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {filteredMaps.map((map) => (
-              <div key={map.id} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-all duration-200">
-                <div className="p-4 sm:p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 truncate">
+                  {/* 地図情報 */}
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
                         {map.title}
                       </h3>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                        {getCategoryLabel(map.category || 'other')}
+                      <ClientOnly>
+                        <LikeButton mapId={map.id} />
+                      </ClientOnly>
+                    </div>
+                    
+                    {map.description && (
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                        {map.description}
                       </p>
-                    </div>
-                    <div className="text-right ml-2">
-                      <div className="text-sm sm:text-base font-bold text-blue-600">
-                        {formatPrice(map.price)}
-                      </div>
-                      {map.forSale && (
-                        <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                          販売中
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="text-gray-700 mb-4 text-sm line-clamp-2">
-                    {map.description}
-                  </p>
-
-                  <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500 mb-4">
-                    <div className="flex items-center space-x-2 sm:space-x-4">
-                      <span>スポット {map.spots?.length || 0}</span>
-                      <span>閲覧 {map.viewCount || 0}</span>
-                    </div>
-                    <LikeButton 
-                      mapId={map.id!} 
-                      initialLikeCount={map.likeCount || 0}
-                      size="small"
-                      showCount={true}
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Link
-                      href={`/maps/${map.id}`}
-                      className="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-center text-sm hover:bg-gray-700 transition-colors"
-                    >
-                      詳細を見る
-                    </Link>
-                    {map.forSale && map.price && (
-                      <Link
-                        href={`/maps/${map.id}/purchase`}
-                        className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-center text-sm hover:bg-blue-700 transition-colors"
-                      >
-                        購入する
-                      </Link>
                     )}
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-500">
+                          {map.spots?.length || 0} スポット
+                        </span>
+                        {map.category && (
+                          <span className="text-sm text-gray-500">
+                            • {mapCategories.find(c => c.id === map.category)?.name}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <button
+                        onClick={() => window.location.href = `/maps/${map.id}`}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        詳細を見る
+                      </button>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3v10" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {searchQuery || selectedCategory !== 'all' ? '検索結果がありません' : '公開地図がありません'}
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  {searchQuery || selectedCategory !== 'all' 
+                    ? '検索条件を変更してもう一度試してください'
+                    : '最初の地図を作成してみませんか？'
+                  }
+                </p>
+                {!searchQuery && selectedCategory === 'all' && (
+                  <button
+                    onClick={() => window.location.href = '/maps/create'}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    地図を作成
+                  </button>
+                )}
               </div>
-            ))}
+            )}
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="text-gray-500 mb-4">条件に一致する地図が見つかりませんでした</div>
-            <Link
-              href="/maps/create"
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              新しい地図を作成
-            </Link>
-          </div>
-        )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

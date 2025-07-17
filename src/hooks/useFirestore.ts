@@ -11,7 +11,7 @@ import {
   where, 
   orderBy 
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, isFirebaseConfigured } from '@/lib/firebase';
 
 // MapDataインターフェースを定義
 export interface MapData {
@@ -50,6 +50,9 @@ export const mapCategories = [
   { id: 'other', name: 'その他', icon: '📍' }
 ];
 
+// Firebase設定の確認をエクスポート
+export { isFirebaseConfigured };
+
 export const useFirestore = () => {
   const [loading, setLoading] = useState(false);
 
@@ -57,6 +60,11 @@ export const useFirestore = () => {
   const createMap = async (mapData: Omit<MapData, 'id'>) => {
     setLoading(true);
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合はランダムIDを返す
+        return `demo-map-${Date.now()}`;
+      }
+      
       const docRef = await addDoc(collection(db, 'maps'), mapData);
       return docRef.id;
     } catch (error) {
@@ -71,6 +79,21 @@ export const useFirestore = () => {
   const getMap = async (mapId: string): Promise<MapData | null> => {
     setLoading(true);
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合はダミーデータを返す
+        return {
+          id: mapId,
+          title: 'デモ地図',
+          description: 'これはデモ用の地図です',
+          isPublic: true,
+          spots: [],
+          createdBy: 'demo-user',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          category: 'other'
+        };
+      }
+      
       const docRef = doc(db, 'maps', mapId);
       const docSnap = await getDoc(docRef);
       
@@ -97,6 +120,11 @@ export const useFirestore = () => {
   const updateMap = async (mapId: string, mapData: Partial<MapData>) => {
     setLoading(true);
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合は何もしない
+        return;
+      }
+      
       const docRef = doc(db, 'maps', mapId);
       await updateDoc(docRef, mapData);
     } catch (error) {
@@ -111,6 +139,11 @@ export const useFirestore = () => {
   const deleteMap = async (mapId: string) => {
     setLoading(true);
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合は何もしない
+        return;
+      }
+      
       const docRef = doc(db, 'maps', mapId);
       await deleteDoc(docRef);
     } catch (error) {
@@ -125,6 +158,34 @@ export const useFirestore = () => {
   const getPublicMaps = async (): Promise<MapData[]> => {
     setLoading(true);
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合はダミーデータを返す
+        return [
+          {
+            id: 'demo-1',
+            title: 'お気に入りカフェ巡り',
+            description: '渋谷周辺のおすすめカフェ',
+            isPublic: true,
+            spots: [],
+            createdBy: 'demo-user',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            category: 'cafe'
+          },
+          {
+            id: 'demo-2',
+            title: '東京観光スポット',
+            description: '初めての東京観光におすすめ',
+            isPublic: true,
+            spots: [],
+            createdBy: 'demo-user',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            category: 'travel'
+          }
+        ];
+      }
+      
       const q = query(
         collection(db, 'maps'),
         where('isPublic', '==', true),
@@ -153,6 +214,11 @@ export const useFirestore = () => {
   const getUserMaps = async (userId: string): Promise<MapData[]> => {
     setLoading(true);
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合はダミーデータを返す
+        return [];
+      }
+      
       const q = query(
         collection(db, 'maps'),
         where('createdBy', '==', userId),
@@ -180,6 +246,11 @@ export const useFirestore = () => {
   // いいねを追加
   const addLike = async (mapId: string, userId: string) => {
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合は何もしない
+        return;
+      }
+      
       const likeData = {
         mapId,
         userId,
@@ -195,6 +266,11 @@ export const useFirestore = () => {
   // いいねを削除
   const removeLike = async (mapId: string, userId: string) => {
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合は何もしない
+        return;
+      }
+      
       const q = query(
         collection(db, 'userLikes'),
         where('mapId', '==', mapId),
@@ -213,6 +289,11 @@ export const useFirestore = () => {
   // いいね状態を確認
   const isLiked = async (mapId: string, userId: string): Promise<boolean> => {
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合はfalseを返す
+        return false;
+      }
+      
       const q = query(
         collection(db, 'userLikes'),
         where('mapId', '==', mapId),
@@ -229,6 +310,11 @@ export const useFirestore = () => {
   // いいね数を取得
   const likesCount = async (mapId: string): Promise<number> => {
     try {
+      if (!isFirebaseConfigured()) {
+        // デモモードの場合は0を返す
+        return 0;
+      }
+      
       const q = query(
         collection(db, 'userLikes'),
         where('mapId', '==', mapId)
