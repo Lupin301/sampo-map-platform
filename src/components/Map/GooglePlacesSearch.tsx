@@ -11,7 +11,6 @@ export default function GooglePlacesSearch({ onPlaceSelect }: GooglePlacesSearch
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // 検索関数
@@ -19,32 +18,19 @@ export default function GooglePlacesSearch({ onPlaceSelect }: GooglePlacesSearch
     if (!searchQuery.trim()) {
       setResults([]);
       setShowResults(false);
-      setError(null);
       return;
     }
 
     setLoading(true);
-    setError(null);
     
     try {
-      console.log('Searching for:', searchQuery); // デバッグ用
-      
       const response = await fetch(`/api/places/search?q=${encodeURIComponent(searchQuery)}`);
       
-      console.log('Response status:', response.status); // デバッグ用
-      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error:', errorText); // デバッグ用
         throw new Error(`API request failed: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('API Response:', data); // デバッグ用
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
       
       if (data.results && Array.isArray(data.results)) {
         setResults(data.results);
@@ -55,7 +41,6 @@ export default function GooglePlacesSearch({ onPlaceSelect }: GooglePlacesSearch
       }
     } catch (error) {
       console.error('Search error:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error');
       setResults([]);
       setShowResults(false);
     } finally {
@@ -65,13 +50,23 @@ export default function GooglePlacesSearch({ onPlaceSelect }: GooglePlacesSearch
 
   // 場所選択
   const handlePlaceSelect = (place: any) => {
-    console.log('Place selected:', place); // デバッグ用
     onPlaceSelect(place);
     setQuery('');
     setResults([]);
     setShowResults(false);
-    setError(null);
   };
+
+  // 外側クリックで結果を非表示
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // 検索の遅延実行
   useEffect(() => {
@@ -81,9 +76,8 @@ export default function GooglePlacesSearch({ onPlaceSelect }: GooglePlacesSearch
       } else {
         setResults([]);
         setShowResults(false);
-        setError(null);
       }
-    }, 800); // 800msに延長
+    }, 300); // 300msに短縮してレスポンシブに
 
     return () => clearTimeout(timeoutId);
   }, [query]);
@@ -95,6 +89,7 @@ export default function GooglePlacesSearch({ onPlaceSelect }: GooglePlacesSearch
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setShowResults(results.length > 0)}
           placeholder="場所を検索..."
           className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -109,14 +104,6 @@ export default function GooglePlacesSearch({ onPlaceSelect }: GooglePlacesSearch
         </div>
       </div>
       
-      {error && (
-        <div className="absolute top-full left-0 right-0 bg-red-50 border border-red-200 rounded-b-md p-3 z-10">
-          <div className="text-sm text-red-600">
-            ⚠️ {error}
-          </div>
-        </div>
-      )}
-      
       {showResults && results.length > 0 && (
         <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-b-md max-h-60 overflow-y-auto z-20 shadow-lg">
           {results.map((place, index) => (
@@ -127,9 +114,6 @@ export default function GooglePlacesSearch({ onPlaceSelect }: GooglePlacesSearch
             >
               <div className="font-medium text-gray-900">{place.name}</div>
               <div className="text-sm text-gray-600">{place.address}</div>
-              <div className="text-xs text-gray-500 mt-1">
-                緯度: {place.lat}, 経度: {place.lng}
-              </div>
             </button>
           ))}
         </div>
