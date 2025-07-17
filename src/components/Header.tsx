@@ -25,6 +25,7 @@ export default function Header() {
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          
           {/* ロゴ */}
           <Link href="/" className="flex items-center">
             <h1 className="text-2xl font-bold text-gray-900">Sampo</h1>
@@ -32,10 +33,10 @@ export default function Header() {
 
           {/* ナビゲーション */}
           <nav className="hidden md:flex space-x-8">
-            <Link href="/marketplace" className="text-gray-700 hover:text-gray-900">
+            <Link href="/marketplace" className="text-gray-700 hover:text-gray-900 transition-colors">
               マーケットプレイス
             </Link>
-            <Link href="/maps/create" className="text-gray-700 hover:text-gray-900">
+            <Link href="/maps/create" className="text-gray-700 hover:text-gray-900 transition-colors">
               地図を作成
             </Link>
           </nav>
@@ -46,7 +47,7 @@ export default function Header() {
               <div className="relative">
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
                 >
                   <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                     {profile?.photoURL ? (
@@ -68,24 +69,24 @@ export default function Header() {
 
                 {/* ドロップダウンメニュー */}
                 {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       onClick={() => setShowDropdown(false)}
                     >
                       マイページ
                     </Link>
                     <Link
                       href="/maps/create"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       onClick={() => setShowDropdown(false)}
                     >
                       地図を作成
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     >
                       ログアウト
                     </button>
@@ -96,13 +97,13 @@ export default function Header() {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/login"
-                  className="text-gray-700 hover:text-gray-900"
+                  className="text-gray-700 hover:text-gray-900 transition-colors"
                 >
                   ログイン
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
                 >
                   新規登録
                 </Link>
