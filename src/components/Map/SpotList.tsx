@@ -1,129 +1,66 @@
 'use client';
 
-import { SpotData } from '@/hooks/useFirestore';
-
-interface SpotListProps {
-  spots: SpotData[];
-  onEditSpot: (spot: SpotData) => void;
-  onDeleteSpot: (spotId: string) => void;
-  onSpotClick: (spot: SpotData) => void;
+interface Spot {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  description?: string;
+  order: number;
 }
 
-export default function SpotList({
-  spots,
-  onEditSpot,
-  onDeleteSpot,
-  onSpotClick
-}: SpotListProps) {
-  if (spots.length === 0) {
-    return (
-      <div className="text-center text-gray-500 py-8">
-        <div className="text-4xl mb-2">📍</div>
-        <p className="text-sm">まだスポットがありません</p>
-        <p className="text-xs mt-1">地図をクリックして最初のスポットを追加しましょう</p>
-      </div>
-    );
-  }
+interface SpotListProps {
+  spots: Spot[];
+  onEditSpot: (spot: Spot) => void;
+  onDeleteSpot: (spotId: string) => void;
+}
 
+export default function SpotList({ spots, onEditSpot, onDeleteSpot }: SpotListProps) {
   return (
-    <div className="h-full flex flex-col">
-      <h3 className="text-lg font-semibold text-gray-900 mb-3 flex-shrink-0">
-        スポット一覧 ({spots.length})
-      </h3>
-      
-      {/* スクロール可能なリストエリア */}
-      <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-        {spots.map((spot, index) => (
-          <div
-            key={spot.id}
-            className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => onSpotClick(spot)}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center mb-2">
-                  <div className="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-sm font-bold mr-3 flex-shrink-0">
-                    {index + 1}
-                  </div>
-                  <h4 className="font-medium text-gray-900 truncate text-sm sm:text-base">
-                    {spot.name}
-                  </h4>
+    <div className="space-y-3">
+      {spots.map((spot, index) => (
+        <div
+          key={spot.id}
+          className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center space-x-3">
+                <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  {index + 1}
+                </span>
+                <div>
+                  <h4 className="font-medium text-gray-900">{spot.name}</h4>
+                  <p className="text-sm text-gray-600">{spot.address}</p>
+                  {spot.description && (
+                    <p className="text-sm text-gray-700 mt-1">{spot.description}</p>
+                  )}
                 </div>
-                
-                {spot.description && (
-                  <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">
-                    {spot.description}
-                  </p>
-                )}
-                
-                {spot.address && (
-                  <p className="text-xs text-gray-500 mb-2 line-clamp-1">
-                    📍 {spot.address}
-                  </p>
-                )}
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 text-xs text-gray-500">
-                    <span className="bg-gray-100 px-2 py-1 rounded text-xs">
-                      {spot.type === 'restaurant' ? '🍽️ レストラン' :
-                       spot.type === 'cafe' ? '☕ カフェ' :
-                       spot.type === 'shopping' ? '🛍️ ショッピング' :
-                       spot.type === 'sightseeing' ? '🏛️ 観光地' :
-                       spot.type === 'hotel' ? '🏨 ホテル' :
-                       spot.type === 'park' ? '🌳 公園' :
-                       spot.type === 'museum' ? '🏛️ 博物館' :
-                       spot.type === 'entertainment' ? '🎭 エンターテイメント' :
-                       spot.type === 'transportation' ? '🚉 交通機関' :
-                       '📌 その他'}
-                    </span>
-                    
-                    {spot.rating && (
-                      <span className="text-yellow-600 text-xs">
-                        ⭐ {spot.rating}/5
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex flex-col space-y-1 ml-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSpotClick(spot);
-                  }}
-                  className="p-1 text-blue-600 hover:bg-blue-50 rounded text-xs transition-colors"
-                  title="地図上で表示"
-                >
-                  🗺️
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEditSpot(spot);
-                  }}
-                  className="p-1 text-gray-600 hover:bg-gray-50 rounded text-xs transition-colors"
-                  title="編集"
-                >
-                  ✏️
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (window.confirm('このスポットを削除しますか？')) {
-                      onDeleteSpot(spot.id!);
-                    }
-                  }}
-                  className="p-1 text-red-600 hover:bg-red-50 rounded text-xs transition-colors"
-                  title="削除"
-                >
-                  🗑️
-                </button>
               </div>
             </div>
+            
+            <div className="flex space-x-2">
+              <button
+                onClick={() => onEditSpot(spot)}
+                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => onDeleteSpot(spot.id)}
+                className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }

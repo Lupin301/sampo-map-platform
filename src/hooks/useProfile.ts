@@ -42,7 +42,7 @@ export const useProfile = () => {
         // プロフィールが存在しない場合は基本情報を設定
         const newProfile = {
           uid: user.uid,
-          displayName: user.displayName || '',
+          displayName: user.displayName || user.email?.split('@')[0] || '',
           bio: '',
           photoURL: user.photoURL || '',
           createdAt: new Date(),
@@ -72,7 +72,20 @@ export const useProfile = () => {
         updatedAt: new Date(),
       };
 
-      await updateDoc(profileRef, updateData);
+      // ドキュメントが存在しない場合は作成
+      const profileDoc = await getDoc(profileRef);
+      if (!profileDoc.exists()) {
+        await setDoc(profileRef, {
+          uid: user.uid,
+          displayName: user.displayName || user.email?.split('@')[0] || '',
+          bio: '',
+          photoURL: user.photoURL || '',
+          createdAt: new Date(),
+          ...updateData,
+        });
+      } else {
+        await updateDoc(profileRef, updateData);
+      }
       
       // ローカル状態も更新
       setProfile(prev => prev ? { ...prev, ...updateData } : null);

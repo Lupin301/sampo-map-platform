@@ -1,227 +1,98 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface GooglePlacesSearchProps {
-  onPlaceSelect: (place: google.maps.places.PlaceResult) => void;
-  placeholder?: string;
-  className?: string;
+  onPlaceSelect: (place: any) => void;
 }
 
-export default function GooglePlacesSearch({
-  onPlaceSelect,
-  placeholder = "場所を検索...",
-  className = ""
-}: GooglePlacesSearchProps) {
+export default function GooglePlacesSearch({ onPlaceSelect }: GooglePlacesSearchProps) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Google Places APIの初期化（1回のみ）
-  useEffect(() => {
-    if (isInitialized) return;
-    
-    initializeGooglePlaces();
-  }, [isInitialized]);
-
-  const initializeGooglePlaces = async () => {
-    if (isInitialized) return;
-    
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
-    
-    if (!apiKey) {
-      setError('Google Places APIキーが設定されていません');
+  // Google Places API検索（実装は後で）
+  const searchPlaces = async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setResults([]);
       return;
     }
 
+    setLoading(true);
     try {
-      setIsInitialized(true);
-      
-      // Google Maps APIが既に読み込まれているかチェック
-      if (window.google && window.google.maps && window.google.maps.places) {
-        console.log('✅ Google Maps API already loaded');
-        setupAutocomplete();
-        return;
-      }
-
-      // 既存のスクリプトタグをチェック
-      const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-      if (existingScript) {
-        console.log('⏳ Google Maps API script exists, waiting...');
-        waitForGoogleMaps();
-        return;
-      }
-
-      // 新しいスクリプトを追加
-      console.log('📥 Loading Google Maps API...');
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-
-      script.onload = () => {
-        console.log('✅ Google Maps API script loaded');
-        waitForGoogleMaps();
-      };
-
-      script.onerror = () => {
-        console.error('❌ Google Maps API script failed to load');
-        setError('Google Maps APIの読み込みに失敗しました');
-        setIsInitialized(false);
-      };
-
-      document.head.appendChild(script);
-
-    } catch (error) {
-      console.error('Google Places初期化エラー:', error);
-      setError('検索機能の初期化に失敗しました');
-      setIsInitialized(false);
-    }
-  };
-
-  const waitForGoogleMaps = () => {
-    let attempts = 0;
-    const maxAttempts = 50;
-
-    const checkInterval = setInterval(() => {
-      attempts++;
-      
-      if (window.google && window.google.maps && window.google.maps.places) {
-        clearInterval(checkInterval);
-        setupAutocomplete();
-      } else if (attempts >= maxAttempts) {
-        clearInterval(checkInterval);
-        setError('Google Maps APIの初期化がタイムアウトしました');
-        setIsInitialized(false);
-      }
-    }, 100);
-  };
-
-  const setupAutocomplete = () => {
-    if (!inputRef.current) {
-      setError('入力要素が見つかりません');
-      return;
-    }
-
-    if (autocompleteRef.current) {
-      console.log('♻️ Autocomplete already exists, cleaning up...');
-      // 既存のリスナーをクリーンアップ
-      google.maps.event.clearInstanceListeners(autocompleteRef.current);
-      autocompleteRef.current = null;
-    }
-
-    try {
-      console.log('🔧 Setting up Google Places Autocomplete...');
-      
-      // 新しいAPIが利用可能かチェック（将来的な対応）
-      if (window.google.maps.places.PlaceAutocompleteElement) {
-        console.log('🆕 New PlaceAutocompleteElement available, but using legacy for stability');
-      }
-      
-      // 従来のAutocompleteを使用（警告は表示されるが動作は安定）
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(
-        inputRef.current,
+      // TODO: Google Places APIの実装
+      // 現在はダミーデータ
+      const dummyResults = [
         {
-          fields: ['place_id', 'geometry', 'name', 'formatted_address'],
-          types: ['establishment', 'geocode']
+          name: `${searchQuery} - サンプル場所1`,
+          address: '東京都渋谷区',
+          lat: 35.6762,
+          lng: 139.6503
+        },
+        {
+          name: `${searchQuery} - サンプル場所2`,
+          address: '東京都新宿区',
+          lat: 35.6896,
+          lng: 139.6917
         }
-      );
-
-      // リスナーを追加
-      const listener = autocompleteRef.current.addListener('place_changed', () => {
-        const place = autocompleteRef.current?.getPlace();
-        console.log('🔍 Place selected:', place?.name);
-        
-        if (place && place.geometry) {
-          // 即座に入力をクリア（地図の再読み込みを防ぐ）
-          if (inputRef.current) {
-            inputRef.current.value = '';
-            inputRef.current.blur(); // フォーカスを外す
-          }
-          
-          // コールバックを呼び出し
-          onPlaceSelect(place);
-        }
-      });
-
-      setIsLoaded(true);
-      setError(null);
-      console.log('✅ Google Places Autocomplete setup complete');
-      
+      ];
+      setResults(dummyResults);
     } catch (error) {
-      console.error('Autocomplete設定エラー:', error);
-      setError('検索機能の設定に失敗しました');
+      console.error('場所検索エラー:', error);
+      setResults([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // クリーンアップ関数
-  useEffect(() => {
-    return () => {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-        autocompleteRef.current = null;
-      }
-    };
-  }, []);
+  const handleSelect = (place: any) => {
+    onPlaceSelect(place);
+    setQuery('');
+    setResults([]);
+  };
 
-  if (error) {
-    return (
-      <div className={className}>
-        <input
-          type="text"
-          disabled
-          placeholder="検索機能が利用できません"
-          className="w-full px-4 py-3 border-2 border-red-300 rounded-lg bg-red-50 text-red-700 placeholder-red-400 text-base"
-        />
-        <p className="text-xs text-red-600 mt-2 font-medium">{error}</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      searchPlaces(query);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [query]);
 
   return (
-    <div className={className}>
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder={isLoaded ? placeholder : "Google Places APIを読み込み中..."}
-          disabled={!isLoaded}
-          className={`
-            w-full pl-12 pr-4 py-3 
-            border-2 border-gray-300 rounded-lg 
-            bg-white text-gray-900 
-            placeholder-gray-500 
-            text-base font-medium
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            hover:border-gray-400
-            transition-colors duration-200
-            ${!isLoaded ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}
-          `}
-        />
-        {!isLoaded && !error && (
-          <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+    <div className="relative">
+      <input
+        ref={inputRef}
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="場所を検索..."
+        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      
+      {loading && (
+        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-b-md p-4 z-10">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-gray-600">検索中...</span>
           </div>
-        )}
-      </div>
-      
-      {!isLoaded && !error && (
-        <p className="text-xs text-blue-600 mt-2 font-medium">
-          Google Places検索を準備中...
-        </p>
+        </div>
       )}
-      
-      {isLoaded && (
-        <p className="text-xs text-green-600 mt-2 font-medium">
-          ✅ 場所を検索してスポットを追加できます
-        </p>
+
+      {results.length > 0 && (
+        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-b-md max-h-60 overflow-y-auto z-10">
+          {results.map((place, index) => (
+            <button
+              key={index}
+              onClick={() => handleSelect(place)}
+              className="w-full px-4 py-3 text-left hover:bg-gray-100 border-b border-gray-200 last:border-b-0"
+            >
+              <div className="font-medium text-gray-900">{place.name}</div>
+              <div className="text-sm text-gray-600">{place.address}</div>
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
